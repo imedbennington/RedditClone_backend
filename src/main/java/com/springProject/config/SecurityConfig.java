@@ -1,34 +1,53 @@
 package com.springProject.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	@SuppressWarnings({ "deprecation", "removal" })
-	public DefaultSecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	    http.csrf().disable()
-	            .authorizeRequests()
-	            .requestMatchers("/register/**").permitAll()
-	            .requestMatchers("/index").permitAll()
-	            .requestMatchers("/viewusers").hasRole("ADMIN")
-	            .and()
-	            .formLogin(
-	                    form -> form
-	                            .loginPage("/login")
-	                            .loginProcessingUrl("/login")
-	                            .defaultSuccessUrl("/viewusers")
-	                            .permitAll()
-	            ).logout(
-	                    logout -> logout
-	                            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-	                            .permitAll()
+	 @Bean
+	    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+	        return httpSecurity.cors().and()
+	                .csrf().disable()
+	                .authorizeHttpRequests(authorize -> authorize
+	                        .requestMatchers("/api/auth/**")
+	                      //  .permitAll()
+	                        //.requestMatchers(HttpMethod.GET, "/api/subreddit")
+	                        .permitAll()
+	                        //.requestMatchers(HttpMethod.GET, "/api/posts/")
+	                        //.permitAll()
+	                        //.requestMatchers(HttpMethod.GET, "/api/posts/**")
+	                        //.permitAll()
+	                        //.requestMatchers("/v2/api-docs",
+	                              //  "/configuration/ui",
+	                                //"/swagger-resources/**",
+	                                //"/configuration/security",
+	                               // "/swagger-ui.html",
+	                               // "/webjars/**")
+	                        //.permitAll()
+	                        //.anyRequest()
+	                    //    .authenticated())
+	                //.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+	               // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	               // .exceptionHandling(exceptions -> exceptions
+	                      //  .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+	                      //  .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+	                ).build();
+	 }
+	 @Bean
+	 PasswordEncoder passwordEncoder() {
+	        return new BCryptPasswordEncoder();
+	    }
 
-	            );
-	    return http.build();
-}
 }
