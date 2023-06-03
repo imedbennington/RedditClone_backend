@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springProject.dto.AuthenticationResponse;
 import com.springProject.dto.LoginRequest;
 import com.springProject.dto.RegisterRequest;
 import com.springProject.service.AuthService;
@@ -21,7 +22,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/auth")
 @AllArgsConstructor
 public class AuthController {
-	private final AuthService authService;
+	private  AuthService authService;
 	@PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) {
         authService.signup(registerRequest);
@@ -34,7 +35,7 @@ public class AuthController {
         return new ResponseEntity<>("Account Activated Successfully",HttpStatus. OK);
     }
 	@PostMapping("/login")
-	public void login (@RequestBody LoginRequest loginRequest) {
-		AuthService.login(loginRequest);
+	public AuthenticationResponse login (@RequestBody LoginRequest loginRequest) {
+		 return authService.login(loginRequest);
 	}
 }

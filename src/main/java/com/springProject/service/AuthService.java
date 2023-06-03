@@ -1,16 +1,20 @@
 package com.springProject.service;
 
 import java.time.Instant;
+
 import java.util.UUID;
 
 import org.apache.el.stream.Optional;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+//import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
 
+import com.springProject.dto.AuthenticationResponse;
 import com.springProject.dto.LoginRequest;
 import com.springProject.dto.RegisterRequest;
 import com.springProject.exception.SpringRedditException;
@@ -19,7 +23,8 @@ import com.springProject.model.User;
 import com.springProject.model.VerificationToken;
 import com.springProject.repository.UserRepository;
 import com.springProject.repository.verificationTokenRepository;
-
+import com.springProject.security.JwtProvider;
+import org.springframework.security.oauth2.jwt.Jwt;
 import jakarta.transaction.Transactional;
 
 @Service 
@@ -35,6 +40,8 @@ public class AuthService {
 	private mailService mailservice;
 	@Autowired
 	private static AuthenticationManager authenticationManager;
+    private  JwtProvider jwtProvider ;
+    private static  RefreshTokenService refreshTokenService;
 	@Transactional
 	public void signup (RegisterRequest registerRequest) {
 		User user = new User();
@@ -70,8 +77,26 @@ public class AuthService {
         user.setEnabled(true);
         userRepository.save(user);
 	}
-	public static void login(LoginRequest loginRequest) {
-		  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                loginRequest.getPassword()));
+	public AuthenticationResponse login(LoginRequest loginRequest) {
+					Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+	                loginRequest.getPassword()));
+				SecurityContextHolder.getContext().setAuthentication(authenticate);
+				 String token = jwtProvider.generatetoken(authenticate);
+	        return AuthenticationResponse.builder()
+	                .authenticationToken(token)
+	                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+	                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+	                .username(loginRequest.getUsername())
+	                .build();
 	}
+	/* public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+	        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+	        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+	        return AuthenticationResponse.builder()
+	                .authenticationToken(token)
+	                .refreshToken(refreshTokenRequest.getRefreshToken())
+	                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+	                .username(refreshTokenRequest.getUsername())
+	                .build();
+	    }*/
 }
