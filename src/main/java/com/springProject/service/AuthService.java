@@ -99,4 +99,11 @@ public class AuthService {
 	                .username(refreshTokenRequest.getUsername())
 	                .build();
 	    }*/
+	@Transactional
+	public User getCurrentUser() {
+		Jwt principal = (Jwt) SecurityContextHolder.
+                getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getSubject())
+                .orElseThrow();
+	}
 }
