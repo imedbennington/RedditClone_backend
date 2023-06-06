@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.el.stream.Optional;
 //import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 
 import com.springProject.dto.AuthenticationResponse;
 import com.springProject.dto.LoginRequest;
+import com.springProject.dto.RefreshTokenRequest;
 import com.springProject.dto.RegisterRequest;
 import com.springProject.exception.SpringRedditException;
 import com.springProject.model.NotificationEmail;
@@ -106,4 +108,18 @@ public class AuthService {
         return userRepository.findByUsername(principal.getSubject())
                 .orElseThrow();
 	}
+	 public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenRequest.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(refreshTokenRequest.getUsername())
+                .build();
+    }
+	 public boolean isLoggedIn() {
+	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	        return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
+	    }
 }
