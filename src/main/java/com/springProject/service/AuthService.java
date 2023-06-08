@@ -2,6 +2,7 @@ package com.springProject.service;
 
 import java.time.Instant;
 
+
 import java.util.UUID;
 
 import org.apache.el.stream.Optional;
@@ -83,7 +84,7 @@ public class AuthService {
 					Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
 	                loginRequest.getPassword()));
 				SecurityContextHolder.getContext().setAuthentication(authenticate);
-				 String token = jwtProvider.generatetoken(authenticate);
+				 String token = jwtProvider.generateToken(authenticate);
 	        return AuthenticationResponse.builder()
 	                .authenticationToken(token)
 	                .refreshToken(refreshTokenService.generateRefreshToken().getToken())

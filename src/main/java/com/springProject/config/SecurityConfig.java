@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -32,24 +34,24 @@ public class SecurityConfig {
 	                        .permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/api/subreddit")
 	                        .permitAll()
-	                        //.requestMatchers(HttpMethod.GET, "/api/posts/")
-	                        //.permitAll()
-	                        //.requestMatchers(HttpMethod.GET, "/api/posts/**")
-	                        //.permitAll()
-	                        //.requestMatchers("/v2/api-docs",
-	                              //  "/configuration/ui",
-	                                //"/swagger-resources/**",
-	                                //"/configuration/security",
-	                               // "/swagger-ui.html",
-	                               // "/webjars/**")
-	                        //.permitAll()
-	                        //.anyRequest()
-	                    //    .authenticated())
-	                //.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-	               // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	               // .exceptionHandling(exceptions -> exceptions
-	                      //  .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-	                      //  .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+	                        .requestMatchers(HttpMethod.GET, "/api/posts/")
+	                        .permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/api/posts/**")
+	                        .permitAll()
+	                        .requestMatchers("/v2/api-docs",
+	                           "/configuration/ui",
+	                                "/swagger-resources/**",
+	                                "/configuration/security",
+	                               "/swagger-ui.html",
+	                               "/webjars/**")
+	                        .permitAll()
+	                        .anyRequest()
+	                     .authenticated())
+	                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+	                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	               .exceptionHandling(exceptions -> exceptions
+	                .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+	                .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
 	                ).build();
 	 }
 	 @Bean
